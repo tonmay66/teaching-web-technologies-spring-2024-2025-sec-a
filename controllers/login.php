@@ -7,11 +7,11 @@ $userModel = new User($pdo);
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-    $password = $_POST['password'];
+    $email = strtolower(trim($_POST['email']));
+    $password = trim($_POST['password']);
 
     if (!$email || !$password) {
-        $error = "Please enter valid email and password.";
+        $error = "Please enter a valid email and password.";
     } else {
         if ($userModel->login($email, $password)) {
             header("Location: ../controllers/dashboard.php");
@@ -22,28 +22,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login - Task Management App</title>
-<link rel="stylesheet" href="../view/public.css">
-<script>
-function validateLoginForm() {
-    const email = document.forms["loginForm"]["email"].value.trim();
-    const password = document.forms["loginForm"]["password"].value.trim();
+    <title>Login - Task Management App</title>
+    <link rel="stylesheet" href="public/css/style.css">
+    <script>
+    function validateLoginForm() {
+        const email = document.forms["loginForm"]["email"].value.trim();
+        const password = document.forms["loginForm"]["password"].value.trim();
 
-    if (!email) {
-        alert("Email is required");
-        return false;
+        if (!email) {
+            alert("Email is required");
+            return false;
+        }
+        if (!password) {
+            alert("Password is required");
+            return false;
+        }
+        return true;
     }
-    if (!password) {
-        alert("Password is required");
-        return false;
-    }
-    return true;
-}
-</script>
+    </script>
 </head>
 <body>
 <header>
@@ -53,7 +52,7 @@ function validateLoginForm() {
 </header>
 <div class="container">
     <h2>Login</h2>
-    <?php if ($error) echo '<p class="error">' . $error . '</p>'; ?>
+    <?php if ($error) echo '<p class="error">' . htmlspecialchars($error) . '</p>'; ?>
     <form name="loginForm" method="post" onsubmit="return validateLoginForm()">
         <input type="email" name="email" placeholder="Email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
         <input type="password" name="password" placeholder="Password" required>

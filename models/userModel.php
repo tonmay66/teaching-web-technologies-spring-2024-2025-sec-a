@@ -6,17 +6,18 @@ class User {
         $this->pdo = $pdo;
     }
 
-    public function register($username, $email, $password, $role='user') {
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $this->pdo->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)");
-        return $stmt->execute([$username, $email, $hash, $role]);
+    public function register($username, $email, $password, $role = 'user') {
+        // Plain-text password (NO HASH)
+        $stmt = $this->pdo->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$username, $email, $password, $role]);
     }
 
     public function login($email, $password) {
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+        $stmt->execute([trim($email)]);
         $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password_hash'])) {
+
+        if ($user && trim($password) === trim($user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
